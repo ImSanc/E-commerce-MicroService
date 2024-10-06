@@ -1,6 +1,7 @@
 package com.springboot.ProductService.Controller;
 
 import com.springboot.ProductService.Model.ProductRequest;
+import com.springboot.ProductService.Model.ProductResponse;
 import com.springboot.ProductService.Service.ProductService;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,5 +20,13 @@ public class ProductController {
     public ResponseEntity<Long> addProduct(@RequestBody ProductRequest productRequest){
         long productId = productService.addProduct(productRequest);
         return  new ResponseEntity<>(productId, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/get-products/{id}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable(value = "id") Long productID){
+
+        var product = productService.getProductById(productID);
+
+        return new ResponseEntity<>(product,HttpStatus.OK);
     }
 }
