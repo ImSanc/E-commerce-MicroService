@@ -3,6 +3,7 @@ package com.example.OrderService.Service;
 import com.example.OrderService.Constants.OrderStatus;
 import com.example.OrderService.Constants.PaymentMode;
 import com.example.OrderService.Entity.Order;
+import com.example.OrderService.External.Client.ProductService;
 import com.example.OrderService.Model.OrderRequest;
 import com.example.OrderService.Repository.OrderRepository;
 import lombok.extern.log4j.Log4j2;
@@ -18,10 +19,18 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private ProductService productService;
+
     @Override
     public long placeOrder(OrderRequest orderRequest) {
 
         log.info("Placing the order {} ",orderRequest);
+
+        productService.reduceQuantity( orderRequest.getProductId() , orderRequest.getQuantity());
+
+        log.info("Creating order with status CREATED");
+
         Order order = Order.builder()
                 .productId(orderRequest.getProductId())
                 .amount(orderRequest.getTotalAmount())

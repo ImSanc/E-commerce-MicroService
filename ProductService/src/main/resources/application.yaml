@@ -6,7 +6,7 @@ spring:
     name: ProductService
   config:
     import:
-      configserver: http://localhost:9296
+      configserver:http://localhost:9296
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

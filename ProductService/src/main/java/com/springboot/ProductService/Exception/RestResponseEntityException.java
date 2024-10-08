@@ -19,4 +19,11 @@ public class RestResponseEntityException extends ResponseEntityExceptionHandler 
                 .build(), HttpStatus.NOT_FOUND
                 );
     }
+
+    @ExceptionHandler(QuantityException.class)
+    public ResponseEntity<ErrorResponse> handleQuantityException(QuantityException exception){
+        return new ResponseEntity<>( new ErrorResponse().builder()
+                .errorCode(exception.getErrorCode())
+                .errorMessage(exception.getMessage()).build(),HttpStatus.BAD_REQUEST);
+    }
 }

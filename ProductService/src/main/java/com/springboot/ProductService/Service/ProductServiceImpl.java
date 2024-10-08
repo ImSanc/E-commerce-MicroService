@@ -2,6 +2,7 @@ package com.springboot.ProductService.Service;
 
 import com.springboot.ProductService.Entity.Product;
 import com.springboot.ProductService.Exception.ProductException;
+import com.springboot.ProductService.Exception.QuantityException;
 import com.springboot.ProductService.Model.ProductRequest;
 import com.springboot.ProductService.Model.ProductResponse;
 import com.springboot.ProductService.Repository.ProductRepository;
@@ -46,5 +47,22 @@ public class ProductServiceImpl implements  ProductService{
                 .quantity(product.getProductQuantity()).build();
 
         return productResponse;
+    }
+
+    @Override
+    public void reduceQuantity(Long productId, Long quantity) {
+        log.info("reducing the quantity for product ID : {}",productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException("Product with id :" + productId + " doesn't exist", "101"));
+
+        if(product.getProductQuantity()<quantity)
+        {
+            throw new QuantityException("Product doesn't have sufficient quantity ","500");
+        }
+
+        product.setProductQuantity(product.getProductQuantity()-quantity);
+        productRepository.save(product);
+        log.info("quantity reduced for product ID : {}",productId);
     }
 }
