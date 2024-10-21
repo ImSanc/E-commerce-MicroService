@@ -18,6 +18,7 @@ public class OrderResponse {
     private String orderStatus;
     private Long amount;
     private ProductDetails productDetails;
+    private PaymentDetails paymentDetails;
 
     @Data
     @Builder
@@ -27,5 +28,16 @@ public class OrderResponse {
         private Long productId;
         private Long quantity;
         private Long price;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PaymentDetails {
+        private Long paymentId;
+        private String paymentStatus;
+        private String paymentMode;
+        private Instant paymentDate ;
     }
 }

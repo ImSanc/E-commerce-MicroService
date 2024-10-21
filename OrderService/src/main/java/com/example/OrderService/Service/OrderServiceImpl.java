@@ -6,6 +6,7 @@ import com.example.OrderService.Exception.CustomException;
 import com.example.OrderService.External.Client.PaymentService;
 import com.example.OrderService.External.Client.ProductService;
 import com.example.OrderService.External.Request.PaymentRequest;
+import com.example.OrderService.External.Response.PaymentResponse;
 import com.example.OrderService.Model.OrderRequest;
 import com.example.OrderService.Model.OrderResponse;
 import com.example.OrderService.Repository.OrderRepository;
@@ -96,11 +97,25 @@ public class OrderServiceImpl implements OrderService{
                 ProductResponse.class
         );
 
+        log.info("invoking payment service for order id : {}",order.getId() );
+
+        PaymentResponse paymentResponse = restTemplate.getForObject(
+                "http://PAYMENTSERVICE/payment/get-payment-details/"+order.getId(),
+                PaymentResponse.class
+        );
+
         OrderResponse.ProductDetails productDetails = OrderResponse.ProductDetails.builder()
                 .productName(productResponse.getProductName())
                 .productId(productResponse.getProductId())
                 .quantity(productResponse.getQuantity())
                 .price(productResponse.getPrice())
+                .build();
+
+        OrderResponse.PaymentDetails paymentDetails = OrderResponse.PaymentDetails.builder()
+                .paymentDate(paymentResponse.getPaymentDate())
+                .paymentId(paymentResponse.getPaymentId())
+                .paymentMode(paymentResponse.getPaymentMode())
+                .paymentStatus(paymentResponse.getPaymentStatus())
                 .build();
 
         return OrderResponse.builder()
@@ -109,6 +124,7 @@ public class OrderServiceImpl implements OrderService{
                 .amount(order.getAmount())
                 .orderDate(order.getOrderDate())
                 .productDetails(productDetails)
+                .paymentDetails(paymentDetails)
                 .build();
     }
 }
