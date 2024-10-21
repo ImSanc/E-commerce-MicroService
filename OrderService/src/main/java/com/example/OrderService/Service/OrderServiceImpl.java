@@ -9,10 +9,12 @@ import com.example.OrderService.External.Request.PaymentRequest;
 import com.example.OrderService.Model.OrderRequest;
 import com.example.OrderService.Model.OrderResponse;
 import com.example.OrderService.Repository.OrderRepository;
+import com.springboot.ProductService.Model.ProductResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 
@@ -28,6 +30,7 @@ public class OrderServiceImpl implements OrderService{
     private ProductService productService;
 
     private final PaymentService paymentService;
+    private final RestTemplate restTemplate;
 
     @Override
     public long placeOrder(OrderRequest orderRequest) {
@@ -86,13 +89,26 @@ public class OrderServiceImpl implements OrderService{
                 ()-> new CustomException("Order not found with Order ID","NOT_FOUND",404)
         );
 
-        OrderResponse orderResponse = OrderResponse.builder()
+        log.info("invoking product service for product id : {}",order.getProductId());
+
+        ProductResponse productResponse= restTemplate.getForObject(
+                "http://PRODUCTSERVICE/product/get-products/"+order.getProductId(),
+                ProductResponse.class
+        );
+
+        OrderResponse.ProductDetails productDetails = OrderResponse.ProductDetails.builder()
+                .productName(productResponse.getProductName())
+                .productId(productResponse.getProductId())
+                .quantity(productResponse.getQuantity())
+                .price(productResponse.getPrice())
+                .build();
+
+        return OrderResponse.builder()
                 .orderId(order.getId())
                 .orderStatus(order.getOrderStatus())
                 .amount(order.getAmount())
                 .orderDate(order.getOrderDate())
+                .productDetails(productDetails)
                 .build();
-
-        return orderResponse;
     }
 }

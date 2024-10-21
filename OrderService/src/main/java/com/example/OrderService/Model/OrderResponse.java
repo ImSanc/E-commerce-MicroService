@@ -17,4 +17,15 @@ public class OrderResponse {
     private Instant orderDate;
     private String orderStatus;
     private Long amount;
+    private ProductDetails productDetails;
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    public static class ProductDetails {
+        private String productName;
+        private Long productId;
+        private Long quantity;
+        private Long price;
+    }
 }

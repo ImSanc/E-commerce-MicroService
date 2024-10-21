@@ -43,6 +43,7 @@ public class ProductServiceImpl implements  ProductService{
 
         var productResponse = ProductResponse.builder()
                 .productName(product.getProductName())
+                .productId(product.getProductId())
                 .price(product.getProductPrice())
                 .quantity(product.getProductQuantity()).build();
 
