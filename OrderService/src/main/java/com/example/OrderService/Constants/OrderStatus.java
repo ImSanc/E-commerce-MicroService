@@ -10,10 +10,12 @@ import lombok.NoArgsConstructor;
 public enum OrderStatus {
 
     CREATED("Created"),
+    PLACED("Placed"),
     CANCELLED("Cancelled"),
     PAYMENT_FAILED("Payment Failed"),
     PENDING("Pending"),
-    FAILED("Failed");
+    FAILED("Failed"),
+    NONE("");
 
     private final String status;
 

@@ -1,19 +1,24 @@
 package com.example.OrderService.Service;
 
 import com.example.OrderService.Constants.OrderStatus;
-import com.example.OrderService.Constants.PaymentMode;
 import com.example.OrderService.Entity.Order;
+import com.example.OrderService.Exception.CustomException;
+import com.example.OrderService.External.Client.PaymentService;
 import com.example.OrderService.External.Client.ProductService;
+import com.example.OrderService.External.Request.PaymentRequest;
 import com.example.OrderService.Model.OrderRequest;
+import com.example.OrderService.Model.OrderResponse;
 import com.example.OrderService.Repository.OrderRepository;
-import lombok.extern.log4j.Log4j2;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
 @Service
-@Log4j2
+@Slf4j
+@AllArgsConstructor
 public class OrderServiceImpl implements OrderService{
 
     @Autowired
@@ -21,6 +26,8 @@ public class OrderServiceImpl implements OrderService{
 
     @Autowired
     private ProductService productService;
+
+    private final PaymentService paymentService;
 
     @Override
     public long placeOrder(OrderRequest orderRequest) {
@@ -41,7 +48,51 @@ public class OrderServiceImpl implements OrderService{
 
         orderRepository.save(order);
 
+        log.info("Calling payment Service to complete the payment: ");
+
+        PaymentRequest paymentRequest = PaymentRequest.builder()
+                .orderId(order.getId())
+                .paymentMode(orderRequest.getPaymentMode())
+                .amount(orderRequest.getTotalAmount())
+                .build();
+
+        OrderStatus orderStatus = OrderStatus.NONE;
+
+        try{
+            paymentService.doPayment(paymentRequest);
+            log.info("payment done successfully, changing the status of order to PLACED" );
+            orderStatus = OrderStatus.PLACED;
+        }
+        catch (Exception e){
+            log.error("Error occurred in payment.Changing the order status to Failed");
+            orderStatus = OrderStatus.FAILED;
+        }
+
+        if(orderStatus.getStatus().isEmpty()){
+            order.setOrderStatus(orderStatus.getStatus());
+            orderRepository.save(order);
+
+        }
+
         log.info("Order placed with ID {} ",order.getId());
         return  order.getId();
+    }
+
+    @Override
+    public OrderResponse getOrderDetails(Long orderid) {
+        log.info("Getting order by ID : {} ",orderid);
+
+        Order order = orderRepository.findById(orderid).orElseThrow(
+                ()-> new CustomException("Order not found with Order ID","NOT_FOUND",404)
+        );
+
+        OrderResponse orderResponse = OrderResponse.builder()
+                .orderId(order.getId())
+                .orderStatus(order.getOrderStatus())
+                .amount(order.getAmount())
+                .orderDate(order.getOrderDate())
+                .build();
+
+        return orderResponse;
     }
 }
