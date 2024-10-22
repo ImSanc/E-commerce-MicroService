@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: CloudGateway
+  config:
+    import:
+      - configserver:http://localhost:9296
+  cloud:
+    gateway:
+      routes:
+        - id: ORDERSERVICE
+          uri: lb://ORDERSERVICE
+          predicates:
+            - Path=/orders/**
+        - id: PAYMENTSERVICE
+          uri: lb://PAYMENTSERVICE
+          predicates:
+            - Path=/payment/**
+        - id: PRODUCTSERVICE
+          uri: lb://PRODUCTSERVICE
+          predicates:
+            - Path=/product/**
+server:
+  port: 9090
